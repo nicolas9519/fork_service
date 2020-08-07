@@ -1,11 +1,11 @@
 const express = require('express');
 const fork = require('./components/fork')
+const { port } = require('./config/config');
 
 const app = express();
-const port = 3000;
 
 app.use('/fork', fork);
 
-app.listen(port, () => {
+app.listen(port, function callbackListen() {
   console.log(`APP RUNNING IN PORT : ${port}`);
 });

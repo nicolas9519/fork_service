@@ -1,21 +1,23 @@
 const { fork } = require('child_process');
+const path = require('path');
+const { env } = require('../../config/config');
 
 class ForkService {
 
-  constructor () {
-    this.myChild = fork('src/components/fork/fork.child.js', [], { execArgv: ["--inspect-brk=0"] });
+  constructor() {
+    this.execArgv = env === 'debug' ? ["--inspect=0"] : [];
     this.runningChild = false;
-    this.myChild.on('message', this.toggleRunningChild.bind(this));
-    this.get = this.get.bind(this);
   }
 
-  async get(req, res) {
+  get = async (req, res) => {
     if (this.runningChild) return res.send('Already running');
-    this.myChild.send(50);
+    const myChild = fork(path.join(__dirname, 'fork.child.js'), [], { execArgv: this.execArgv });
+    myChild.on('message', this.toggleRunningChild);
+    myChild.send(req.query.quantity);
     return res.send(true);
   }
 
-  async toggleRunningChild(obj) {
+  toggleRunningChild = async (obj) => {
     this.runningChild = obj;
   }
 
